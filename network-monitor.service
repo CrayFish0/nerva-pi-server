@@ -1,0 +1,16 @@
+[Unit]
+Description=Network Monitor for Raspberry Pi Stats Broadcaster
+After=network.target
+
+[Service]
+Type=simple
+User=user
+WorkingDirectory=/home/user/projects/stats-boradcaster
+ExecStart=/home/user/projects/stats-boradcaster/start_monitor.sh
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

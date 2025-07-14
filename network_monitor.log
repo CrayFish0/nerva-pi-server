@@ -1,0 +1,64 @@
+2025-07-14 11:49:16,499 - INFO - Starting network monitor for interface: wlan0
+2025-07-14 11:49:16,499 - INFO - Check interval: 5 seconds
+2025-07-14 11:49:16,499 - INFO - Server script: ./start_server.sh
+2025-07-14 11:49:16,545 - INFO - Network connected: 192.168.29.112
+2025-07-14 11:49:16,560 - INFO - Starting stats broadcaster server...
+2025-07-14 11:49:18,591 - INFO - Stats broadcaster server started successfully
+2025-07-14 11:53:06,063 - INFO - Received signal 15, shutting down...
+2025-07-14 11:53:06,080 - INFO - Stats broadcaster server stopped
+2025-07-14 11:53:48,482 - INFO - Starting network monitor for interface: wlan0
+2025-07-14 11:53:48,482 - INFO - Check interval: 5 seconds
+2025-07-14 11:53:48,482 - INFO - Server script: ./start_server.sh
+2025-07-14 11:53:48,516 - INFO - Network connected: 192.168.29.112
+2025-07-14 11:53:48,533 - INFO - Starting stats broadcaster server...
+2025-07-14 11:53:50,568 - INFO - Stats broadcaster server started successfully
+2025-07-14 11:57:49,145 - INFO - Received signal 15, shutting down...
+2025-07-14 11:57:49,146 - INFO - Received signal 15, shutting down...
+2025-07-14 11:57:49,161 - INFO - Stats broadcaster server stopped
+2025-07-14 11:57:49,226 - INFO - Starting network monitor for interface: wlan0
+2025-07-14 11:57:49,226 - INFO - Check interval: 5 seconds
+2025-07-14 11:57:49,226 - INFO - Server script: ./start_server.sh
+2025-07-14 11:57:49,266 - INFO - Network connected: 192.168.29.112
+2025-07-14 11:57:49,283 - INFO - Starting stats broadcaster server...
+2025-07-14 11:57:51,316 - INFO - Stats broadcaster server started successfully
+2025-07-14 11:59:14,424 - INFO - Received signal 15, shutting down...
+2025-07-14 11:59:14,450 - INFO - Received signal 15, shutting down...
+2025-07-14 11:59:14,452 - INFO - Stats broadcaster server stopped
+2025-07-14 11:59:28,908 - INFO - Starting network monitor for interface: wlan0
+2025-07-14 11:59:28,911 - INFO - Check interval: 5 seconds
+2025-07-14 11:59:28,911 - INFO - Server script: ./start_server.sh
+2025-07-14 11:59:39,009 - INFO - Network connected: 192.168.29.112
+2025-07-14 11:59:39,021 - INFO - Starting stats broadcaster server...
+2025-07-14 11:59:41,051 - INFO - Stats broadcaster server started successfully
+2025-07-14 12:04:11,932 - INFO - Received signal 15, shutting down...
+2025-07-14 12:04:11,948 - INFO - Received signal 15, shutting down...
+2025-07-14 12:04:11,976 - INFO - Stats broadcaster server stopped
+2025-07-14 12:04:15,241 - INFO - Starting network monitor for interface: wlan0
+2025-07-14 12:04:15,246 - INFO - Check interval: 5 seconds
+2025-07-14 12:04:15,246 - INFO - Server script: ./start_server.sh
+2025-07-14 12:04:20,493 - INFO - Network connected: 192.168.29.112
+2025-07-14 12:04:20,510 - INFO - Starting stats broadcaster server...
+2025-07-14 12:04:22,545 - INFO - Stats broadcaster server started successfully
+2025-07-14 12:38:19,072 - INFO - Received signal 15, shutting down...
+2025-07-14 12:38:19,102 - INFO - Received signal 15, shutting down...
+2025-07-14 12:38:19,124 - INFO - Stats broadcaster server stopped
+2025-07-14 12:38:22,239 - INFO - Starting network monitor for interface: wlan0
+2025-07-14 12:38:22,243 - INFO - Check interval: 5 seconds
+2025-07-14 12:38:22,243 - INFO - Server script: ./start_server.sh
+2025-07-14 12:38:29,031 - INFO - Network connected: 192.168.29.112
+2025-07-14 12:38:29,047 - INFO - Starting stats broadcaster server...
+2025-07-14 12:38:31,075 - INFO - Stats broadcaster server started successfully
+2025-07-14 17:15:14,109 - INFO - Starting network monitor for interface: wlan0
+2025-07-14 17:15:14,109 - INFO - Check interval: 5 seconds
+2025-07-14 17:15:14,109 - INFO - Server script: ./start_server.sh
+2025-07-14 17:15:14,149 - INFO - Network connected: 192.168.29.112
+2025-07-14 17:27:10,891 - INFO - Received signal 15, shutting down...
+2025-07-14 17:27:10,909 - INFO - Received signal 15, shutting down...
+2025-07-14 17:27:10,930 - INFO - Stats broadcaster server stopped
+2025-07-14 17:27:24,938 - INFO - Starting network monitor for interface: wlan0
+2025-07-14 17:27:24,941 - INFO - Check interval: 5 seconds
+2025-07-14 17:27:24,941 - INFO - Server script: ./start_server.sh
+2025-07-14 17:27:32,995 - WARNING - Interface wlan0 has IP 192.168.29.112 but no internet connectivity
+2025-07-14 17:27:38,907 - INFO - Network connected: 192.168.29.112
+2025-07-14 17:27:38,919 - INFO - Starting stats broadcaster server...
+2025-07-14 17:27:41,081 - INFO - Stats broadcaster server started successfully

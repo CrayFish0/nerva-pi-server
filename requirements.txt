@@ -1,0 +1,3 @@
+websockets>=11.0.0
+psutil>=5.9.0
+netifaces>=0.11.0
