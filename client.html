@@ -333,6 +333,31 @@
                 </div>
                 <div id="sensors-container"></div>
             </div>
+
+            <!-- Custom Sensors -->
+            <div class="section">
+                <h2>🔬 Custom Sensors</h2>
+                <div class="stat-item">
+                    <span class="stat-label">Ambient Temperature</span>
+                    <span class="stat-value" id="ambient-temp">--°C</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Ultrasonic Distance</span>
+                    <span class="stat-value" id="ultrasonic-distance">-- cm</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Water Turbidity</span>
+                    <span class="stat-value" id="water-turbidity">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">pH Level</span>
+                    <span class="stat-value" id="ph-level">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">GPIO Sensors</span>
+                    <span class="stat-value" id="gpio-status">--</span>
+                </div>
+            </div>
         </div>
 
         <div class="two-column">
@@ -594,6 +619,55 @@
                         });
                     });
                 }
+            }
+
+            // Custom Sensors
+            if (data.custom_sensors) {
+                // Ambient Temperature
+                document.getElementById('ambient-temp').textContent =
+                    data.custom_sensors.ambient_temp_celsius !== null ?
+                        data.custom_sensors.ambient_temp_celsius + '°C' : 'N/A';
+
+                // Ultrasonic Distance
+                document.getElementById('ultrasonic-distance').textContent =
+                    data.custom_sensors.ultrasonic_distance_cm !== null ?
+                        data.custom_sensors.ultrasonic_distance_cm + ' cm' : 'N/A';
+
+                // Water Turbidity
+                const turbidityElement = document.getElementById('water-turbidity');
+                turbidityElement.textContent = data.custom_sensors.water_turbidity || 'N/A';
+
+                // Color code turbidity status
+                if (data.custom_sensors.water_turbidity === 'Clear') {
+                    turbidityElement.style.color = '#27ae60';
+                } else if (data.custom_sensors.water_turbidity === 'Turbid') {
+                    turbidityElement.style.color = '#e74c3c';
+                } else {
+                    turbidityElement.style.color = '#666';
+                }
+
+                // pH Level
+                const phElement = document.getElementById('ph-level');
+                if (data.custom_sensors.ph_level !== null) {
+                    phElement.textContent = data.custom_sensors.ph_level;
+
+                    // Color code pH level (7 is neutral, <7 acidic, >7 alkaline)
+                    const ph = data.custom_sensors.ph_level;
+                    if (ph >= 6.5 && ph <= 7.5) {
+                        phElement.style.color = '#27ae60'; // Green for neutral/good
+                    } else if (ph >= 6.0 && ph <= 8.0) {
+                        phElement.style.color = '#f39c12'; // Orange for slightly off
+                    } else {
+                        phElement.style.color = '#e74c3c'; // Red for problematic
+                    }
+                } else {
+                    phElement.textContent = 'N/A';
+                    phElement.style.color = '#666';
+                }
+
+                // GPIO Status
+                document.getElementById('gpio-status').textContent =
+                    data.custom_sensors.gpio_available ? '✅ Active' : '❌ Unavailable';
             }
 
             // Storage Information
