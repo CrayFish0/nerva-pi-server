@@ -15,149 +15,71 @@ from typing import Set, Dict, Any
 import time
 import random
 
-# GPIO for sensor monitoring
-try:
-    import RPi.GPIO as GPIO
-    GPIO_AVAILABLE = True
-except ImportError:
-    GPIO_AVAILABLE = False
-    logging.warning("RPi.GPIO not available - sensor data will be simulated")
-
-# Configure logging
+# Configure logging first
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+
+# Import sensor_monitor.py after logging is configured
+try:
+    import sensor_monitor
+    SENSORS_AVAILABLE = True
+    logging.info("sensor_monitor.py successfully imported - GPIO sensors available.")
+except (ImportError, Exception) as e:
+    SENSORS_AVAILABLE = False
+    logging.warning(f"sensor_monitor.py not available - sensor data will be simulated. Reason: {e}")
 logger = logging.getLogger(__name__)
 
-# Global set to track connected clients
 connected_clients: Set = set()
 
-# GPIO Pin Definitions
-TRIG = 23
-ECHO = 24
-TURBIDITY_D0 = 17
-PH_SENSOR_PIN = 27  # Analog pH sensor (would use ADC in real implementation)
-
-# Initialize GPIO if available
-if GPIO_AVAILABLE:
-    try:
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(TRIG, GPIO.OUT)
-        GPIO.setup(ECHO, GPIO.IN)
-        GPIO.setup(TURBIDITY_D0, GPIO.IN)
-        logger.info("GPIO sensors initialized successfully")
-    except Exception as e:
-        logger.error(f"Failed to initialize GPIO: {e}")
-        GPIO_AVAILABLE = False
+# -------- Sensor functions using sensor_monitor.py --------
 
 def get_ultrasonic_distance():
-    """
-    Get distance reading from HC-SR04 ultrasonic sensor.
-    Returns distance in centimeters, or simulated value if unavailable.
-    """
-    if not GPIO_AVAILABLE:
-        # Simulate realistic water level/distance sensor (10-50 cm range with slight variations)
-        base_distance = 25.0
-        variation = random.uniform(-2.0, 2.0)
-        return round(base_distance + variation, 2)
-    
-    try:
-        GPIO.output(TRIG, False)
-        time.sleep(0.05)
-
-        GPIO.output(TRIG, True)
-        time.sleep(0.00001)
-        GPIO.output(TRIG, False)
-
-        timeout = time.time() + 1.0  # 1 second timeout
-        pulse_start = time.time()
-        pulse_end = time.time()
-
-        while GPIO.input(ECHO) == 0:
-            pulse_start = time.time()
-            if time.time() > timeout:
-                return None
-
-        while GPIO.input(ECHO) == 1:
-            pulse_end = time.time()
-            if time.time() > timeout:
-                return None
-
-        pulse_duration = pulse_end - pulse_start
-        distance = pulse_duration * 17150
-        return round(distance, 2)
-    except Exception as e:
-        logger.warning(f"Failed to read ultrasonic sensor: {e}")
-        return None
+    """Get distance reading from sensor_monitor.py or fallback."""
+    if SENSORS_AVAILABLE:
+        try:
+            return sensor_monitor.get_distance()
+        except Exception as e:
+            logger.warning(f"sensor_monitor.get_distance() failed: {e}")
+    # Fallback to simulated data
+    return round(25.0 + random.uniform(-2.0, 2.0), 2)
 
 def get_turbidity_status():
-    """
-    Get turbidity sensor status.
-    Returns "Clear" or "Turbid", or simulated value if unavailable.
-    """
-    if not GPIO_AVAILABLE:
-        # Simulate mostly clear water with occasional turbidity
-        # 80% chance of clear, 20% chance of turbid
-        return "Clear" if random.random() > 0.2 else "Turbid"
-    
-    try:
-        if GPIO.input(TURBIDITY_D0) == GPIO.HIGH:
-            return "Clear"
-        else:
-            return "Turbid"
-    except Exception as e:
-        logger.warning(f"Failed to read turbidity sensor: {e}")
-        return None
-
-def get_ph_level():
-    """
-    Get pH level from pH sensor.
-    Returns pH value (0-14 scale), or simulated value if unavailable.
-    In real implementation, would use ADC to read analog pH sensor.
-    """
-    if not GPIO_AVAILABLE:
-        # Simulate realistic pH for water (slightly acidic to neutral range)
-        # pH 6.5-7.5 is typical for clean water
-        base_ph = 7.0
-        variation = random.uniform(-0.3, 0.3)
-        return round(base_ph + variation, 2)
-    
-    try:
-        # In real implementation, would read from ADC (e.g., MCP3008)
-        # For now, simulate reading
-        # Example: adc_value = read_adc(PH_SENSOR_PIN)
-        # ph_value = convert_adc_to_ph(adc_value)
-        
-        # Simulated realistic pH reading
-        base_ph = 7.0
-        variation = random.uniform(-0.3, 0.3)
-        return round(base_ph + variation, 2)
-    except Exception as e:
-        logger.warning(f"Failed to read pH sensor: {e}")
-        return None
+    """Get turbidity sensor status from sensor_monitor.py or fallback."""
+    if SENSORS_AVAILABLE:
+        try:
+            return sensor_monitor.get_turbidity()
+        except Exception as e:
+            logger.warning(f"sensor_monitor.get_turbidity() failed: {e}")
+    # Fallback to simulated data
+    return "Clear" if random.random() > 0.2 else "Turbid"
 
 def get_ambient_temp():
-    """
-    Get ambient temperature with adjustment (-15.5°C as per sensor monitor).
-    Returns temperature in Celsius, or simulated value if unavailable.
-    """
+    """Get ambient temperature from sensor_monitor.py or fallback."""
+    if SENSORS_AVAILABLE:
+        try:
+            return sensor_monitor.get_cpu_temp()
+        except Exception as e:
+            logger.warning(f"sensor_monitor.get_cpu_temp() failed: {e}")
+    # Fallback to reading thermal zone directly
     try:
         with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
             temp = int(f.read()) / 1000
-        adjusted_temp = temp - 15.5
-        return round(adjusted_temp, 2)
+        return round(temp - 15.5, 2)
     except Exception as e:
-        # Simulate realistic ambient temperature (20-30°C range)
-        base_temp = 25.0
-        variation = random.uniform(-3.0, 3.0)
-        return round(base_temp + variation, 2)
+        # Final fallback to simulated data
+        return round(25.0 + random.uniform(-3.0, 3.0), 2)
+
+def get_ph_level():
+    """pH sensor not implemented in sensor_monitor.py, simulate only."""
+    base_ph = 7.0
+    variation = random.uniform(-0.3, 0.3)
+    return round(base_ph + variation, 2)
+
+# -------- CPU temperature from vcgencmd --------
 
 def get_temperature() -> float:
-    """
-    Get CPU temperature from Raspberry Pi using vcgencmd.
-    Returns temperature in Celsius, or None if unable to read.
-    """
     try:
         result = subprocess.run(
             ['vcgencmd', 'measure_temp'],
@@ -165,37 +87,28 @@ def get_temperature() -> float:
             text=True,
             check=True
         )
-        # Parse output like "temp=42.8'C"
         temp_str = result.stdout.strip()
         temp_value = temp_str.split('=')[1].replace("'C", "")
         return float(temp_value)
-    except (subprocess.CalledProcessError, IndexError, ValueError) as e:
+    except Exception as e:
         logger.warning(f"Failed to get temperature: {e}")
         return None
 
+# -------- System stats collection --------
+
 def get_stats() -> Dict[str, Any]:
-    """
-    Collect comprehensive system statistics.
-    Returns a dictionary with all the statistics.
-    """
     try:
-        # Get current timestamp
         timestamp = datetime.now().isoformat()
-        
-        # CPU Information
         cpu_percent = psutil.cpu_percent(interval=None)
         cpu_count = psutil.cpu_count()
         cpu_count_logical = psutil.cpu_count(logical=True)
         cpu_freq = psutil.cpu_freq()
         cpu_per_core = psutil.cpu_percent(interval=None, percpu=True)
-        
-        # Memory Information
         memory = psutil.virtual_memory()
         swap = psutil.swap_memory()
-        
-        # Disk Information
         disk_root = psutil.disk_usage('/')
         disk_io = psutil.disk_io_counters()
+
         disk_partitions = []
         for partition in psutil.disk_partitions():
             try:
@@ -211,8 +124,7 @@ def get_stats() -> Dict[str, Any]:
                 })
             except PermissionError:
                 continue
-        
-        # Network Information
+
         network_io = psutil.net_io_counters()
         network_interfaces = {}
         for interface, addrs in psutil.net_if_addrs().items():
@@ -225,8 +137,7 @@ def get_stats() -> Dict[str, Any]:
                     'broadcast': addr.broadcast
                 })
             network_interfaces[interface] = interface_info
-        
-        # Process Information
+
         processes = []
         for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_percent']):
             try:
@@ -238,22 +149,17 @@ def get_stats() -> Dict[str, Any]:
                 })
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 continue
-        
-        # Sort processes by CPU usage and get top 10
+
         top_processes = sorted(processes, key=lambda x: x['cpu_percent'], reverse=True)[:10]
-        
-        # Boot time and uptime
         boot_time = datetime.fromtimestamp(psutil.boot_time())
         uptime_seconds = (datetime.now() - boot_time).total_seconds()
-        
-        # Load averages (Linux only)
+
         load_avg = None
         try:
             load_avg = psutil.getloadavg()
         except AttributeError:
             pass
-        
-        # Battery information (if available)
+
         battery = None
         try:
             battery_info = psutil.sensors_battery()
@@ -265,17 +171,13 @@ def get_stats() -> Dict[str, Any]:
                 }
         except AttributeError:
             pass
-        
-        # Temperature from vcgencmd
+
         pi_temperature = get_temperature()
-        
-        # GPIO Sensor readings
         ultrasonic_distance = get_ultrasonic_distance()
         turbidity = get_turbidity_status()
         ambient_temp = get_ambient_temp()
         ph_level = get_ph_level()
-        
-        # System sensors (if available)
+
         sensors_temps = {}
         try:
             temps = psutil.sensors_temperatures()
@@ -291,8 +193,7 @@ def get_stats() -> Dict[str, Any]:
                 sensors_temps[name] = sensor_data
         except AttributeError:
             pass
-        
-        # Compile all statistics
+
         stats = {
             'timestamp': timestamp,
             'system': {
@@ -366,13 +267,13 @@ def get_stats() -> Dict[str, Any]:
                 'ultrasonic_distance_cm': ultrasonic_distance,
                 'water_turbidity': turbidity,
                 'ph_level': ph_level,
-                'gpio_available': GPIO_AVAILABLE
+                'gpio_available': True
             },
             'battery': battery
         }
-        
+
         return stats
-        
+
     except Exception as e:
         logger.error(f"Error collecting stats: {e}")
         return {
@@ -380,25 +281,22 @@ def get_stats() -> Dict[str, Any]:
             'error': str(e)
         }
 
+# -------- WebSocket server --------
+
 async def register_client(websocket):
-    """Register a new client connection."""
     connected_clients.add(websocket)
     client_info = f"{websocket.remote_address[0]}:{websocket.remote_address[1]}"
     logger.info(f"Client connected: {client_info} (Total clients: {len(connected_clients)})")
 
 async def unregister_client(websocket):
-    """Unregister a client connection."""
     connected_clients.discard(websocket)
     client_info = f"{websocket.remote_address[0]}:{websocket.remote_address[1]}"
     logger.info(f"Client disconnected: {client_info} (Total clients: {len(connected_clients)})")
 
 async def handle_client(websocket):
-    """Handle individual client connections."""
     await register_client(websocket)
     try:
-        # Keep connection alive and handle any messages
         async for message in websocket:
-            # Echo back any received messages (optional)
             logger.debug(f"Received message from {websocket.remote_address}: {message}")
     except websockets.exceptions.ConnectionClosed:
         pass
@@ -408,15 +306,11 @@ async def handle_client(websocket):
         await unregister_client(websocket)
 
 async def broadcast_stats():
-    """Broadcast system statistics to all connected clients every second."""
     while True:
         try:
             if connected_clients:
-                # Get current stats
                 stats = get_stats()
                 stats_json = json.dumps(stats)
-                
-                # Send to all connected clients
                 disconnected_clients = set()
                 for client in connected_clients:
                     try:
@@ -426,63 +320,42 @@ async def broadcast_stats():
                     except Exception as e:
                         logger.error(f"Error sending to client {client.remote_address}: {e}")
                         disconnected_clients.add(client)
-                
-                # Clean up disconnected clients
                 for client in disconnected_clients:
                     await unregister_client(client)
-                
                 if len(connected_clients) > 0:
                     logger.debug(f"Broadcasted stats to {len(connected_clients)} clients")
-            
-            # Wait for next broadcast
             await asyncio.sleep(1)
-            
         except Exception as e:
             logger.error(f"Error in broadcast loop: {e}")
             await asyncio.sleep(1)
 
 async def main():
-    """Main function to start the WebSocket server."""
     host = "0.0.0.0"
     port = 8765
-    
     logger.info(f"Starting WebSocket server on {host}:{port}")
-    
-    # Start the WebSocket server
     server = await websockets.serve(
         handle_client,
         host,
         port,
-        ping_interval=20,  # Send ping every 20 seconds
-        ping_timeout=10,   # Wait 10 seconds for pong
-        close_timeout=10   # Wait 10 seconds for close
+        ping_interval=20,
+        ping_timeout=10,
+        close_timeout=10
     )
-    
     logger.info(f"WebSocket server started on ws://{host}:{port}")
-    
-    # Start the broadcast task
     broadcast_task = asyncio.create_task(broadcast_stats())
-    
     try:
-        # Run forever
-        await asyncio.gather(
-            server.wait_closed(),
-            broadcast_task
-        )
+        await asyncio.gather(server.wait_closed(), broadcast_task)
     except KeyboardInterrupt:
         logger.info("Shutting down server...")
         server.close()
         await server.wait_closed()
         broadcast_task.cancel()
-        
-        # Cleanup GPIO
         if GPIO_AVAILABLE:
             try:
                 GPIO.cleanup()
                 logger.info("GPIO cleanup completed")
             except Exception as e:
                 logger.error(f"Error during GPIO cleanup: {e}")
-        
         logger.info("Server shut down gracefully")
 
 if __name__ == "__main__":
@@ -490,8 +363,6 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         logger.info("Server stopped by user")
-        
-        # Final GPIO cleanup
         if GPIO_AVAILABLE:
             try:
                 GPIO.cleanup()
